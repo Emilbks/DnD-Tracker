@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-namespace TimekeeperProgram
+namespace Timekeeper_Program
 {
     public class Date
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
-namespace TimekeeperProgram
+namespace Timekeeper_Program
 {
 	public class GlobalState
 	{
