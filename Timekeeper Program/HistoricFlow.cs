@@ -78,7 +78,7 @@ namespace Timekeeper_Program
 						content = $"{"Applied Flow", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(value), 15} at {tax * 100, 3}% tax. Balance {GlobalState.FormatNotes(oldBalance), 8} -> {GlobalState.FormatNotes(newBalance), 8}";
 						break;
 					case HistoricFlowType.TransactionFlow:
-						content = $"Transaction: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(oldFlow?.value ?? 0), 15} at {oldFlow?.tax * 100 ?? 0, 3}% tax. | Balance {GlobalState.FormatNotes(oldBalance), 8} -> {GlobalState.FormatNotes(newBalance), 8}";
+						content = $"{"Transaction", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(oldFlow?.value ?? 0), 15} at {oldFlow?.tax * 100 ?? 0, 3}% tax. | Balance {GlobalState.FormatNotes(oldBalance), 8} -> {GlobalState.FormatNotes(newBalance), 8}";
 						break;
 					default:
 						content = $"{type, -GlobalState.DESCRIPTION_LENGTH}: {GlobalState.FormatNotes(value), 15}, tax {tax * 100}%";

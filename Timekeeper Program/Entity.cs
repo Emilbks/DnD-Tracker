@@ -95,7 +95,7 @@ namespace Timekeeper_Program
 
 		public void DisplayHistory()
 		{
-			Console.WriteLine($"History for {name} ({reference}):");
+			Console.WriteLine($"History for {name} ({reference} | ID: {id}):");
 			foreach (HistoricFlow flow in history)
 			{
 				flow.DisplayFlow();
