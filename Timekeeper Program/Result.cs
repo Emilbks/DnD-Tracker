@@ -2,13 +2,13 @@ namespace Timekeeper_Program
 {
 	public class Result<T, U>
     {
-        public T? Value { get; private set; }
+        public T? Ok { get; private set; }
         public U? Error { get; private set; }
         public bool IsSuccess { get; private set; }
 
         private Result(T value)
         {
-            Value = value;
+            Ok = value;
             IsSuccess = true;
         }
 

@@ -245,7 +245,7 @@ Result<bool, string> ChangeNoteFlowOnEntity(Entity? entity = null, string? refer
                 Console.WriteLine($"Failed to get new flow: {result.Error}");
                 return Result<bool, string>.Failure($"Failed to get new flow: {result.Error}");
             }
-            newFlow = result.Value!;
+            newFlow = result.Ok!;
             break;
         case 2:
             result = GetNoteFlowFromUserCommaSeparated();
@@ -254,7 +254,7 @@ Result<bool, string> ChangeNoteFlowOnEntity(Entity? entity = null, string? refer
                 Console.WriteLine($"Failed to get new flow: {result.Error}");
                 return Result<bool, string>.Failure($"Failed to get new flow: {result.Error}");
             }
-            newFlow = result.Value!;
+            newFlow = result.Ok!;
             break;
         case 3:
             if (parameters == null || parameters.Length != 8)
@@ -281,7 +281,7 @@ Result<bool, string> ChangeNoteFlowOnEntity(Entity? entity = null, string? refer
                     Console.WriteLine($"Failed to create new flow: {result.Error}");
                     return Result<bool, string>.Failure($"Failed to create new flow: {result.Error}");
                 }
-                newFlow = result.Value ?? flowToChange.Clone();
+                newFlow = result.Ok ?? flowToChange.Clone();
             }
             catch (Exception ex)
             {
@@ -365,7 +365,7 @@ Result<NoteFlow, string> MakeNoteFlow(long value, int frequency, string offsetIn
     if (!System.Text.RegularExpressions.Regex.IsMatch(recipient, @"^[a-zA-Z0-9-_]+$")) return Result<NoteFlow, string>.Failure($"Recipient '{recipient}' contains invalid characters.");
 
     if (!taxResult.IsSuccess) return Result<NoteFlow, string>.Failure(taxResult.Error!);
-    double tax = taxResult.Value;
+    double tax = taxResult.Ok;
     return Result<NoteFlow, string>.Success(new NoteFlow(value, frequency, offset, occurance, tax, reference, sender, recipient));
 }
 
@@ -391,7 +391,7 @@ Result<bool, string> AddNoteFlowToEntity(Entity? entity = null, int? format = nu
 
             var makeResult = MakeNoteFlow(value, frequency, offsetInput, occurance, taxInput, reference, sender, recipient);
             if (!makeResult.IsSuccess) return Result<bool, string>.Failure(makeResult.Error!);
-            noteFlow = makeResult.Value!;
+            noteFlow = makeResult.Ok!;
             entity.AddFlow(noteFlow);
             return Result<bool, string>.Success(true);
         }
@@ -419,12 +419,12 @@ Result<bool, string> AddNoteFlowToEntity(Entity? entity = null, int? format = nu
         case 1:
             var result1 = GetNoteFlowFromUser(entity);
             if (!result1.IsSuccess) return Result<bool, string>.Failure(result1.Error!);
-            noteFlow = result1.Value!;
+            noteFlow = result1.Ok!;
             break;
         case 2:
             var result2 = GetNoteFlowFromUserCommaSeparated();
             if (!result2.IsSuccess) return Result<bool, string>.Failure(result2.Error!);
-            noteFlow = result2.Value!;
+            noteFlow = result2.Ok!;
             break;
         default:
             Console.WriteLine("Invalid format selection.");
@@ -563,7 +563,7 @@ Result<bool, string> MakeTransaction(Entity? senderEntity, Entity? recipientEnti
         Console.WriteLine($"Invalid tax input: {taxResult.Error}");
         return Result<bool, string>.Failure($"Invalid tax input: {taxResult.Error}");
     }
-    double tax = taxResult.Value;
+    double tax = taxResult.Ok;
     var result = state.MakeTransaction(senderEntity, recipientEntity, value, tax, reference);
     if (!result.IsSuccess)
     {
