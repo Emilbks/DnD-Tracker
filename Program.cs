@@ -69,6 +69,7 @@ while (true)
             break;
 
         case "mt":
+            result = MakeTransaction(strings.Length >= 2 ? GetEntityByReferenceOrId(strings[1]) : null, strings.Length >= 3 ? GetEntityByReferenceOrId(strings[2]) : null, strings.Length >= 4 && long.TryParse(strings[3], out long value) ? value : 0, strings.Length >= 5 ? strings[4] : GlobalState.TAX.ToString(), strings.Length >= 6 ? strings[5] : "manual_transaction");
             break;
 
         case "s":
@@ -115,6 +116,7 @@ void Help()
     Console.WriteLine("af [reference|id] [format] [parameters (x9)] -> add flow: Add a new NoteFlow to a specific entity. Format 1 for one by one, 2 for comma-separated, 3 for parameters.");
     Console.WriteLine("cf [reference|id] [format] [flow reference|id] [parameters (x9)] -> change flow: Change an existing NoteFlow on a specific entity. Format 1 for one by one, 2 for comma-separated, 3 for parameters.");
     Console.WriteLine("rf [reference|id] [flow reference|id] [force] -> remove flow: Remove a NoteFlow from a specific entity. Use 'true' or 'force' to skip confirmation.");
+    Console.WriteLine("mt [sender reference|id] [recipient reference|id] [value] [tax] [reference] -> make transaction: Make a transaction between two entities.");
     Console.WriteLine("s [filename] -> save: Save the current global state to a file.");
     Console.WriteLine("l [filename] -> load: Load a global state from a file.");
     Console.WriteLine("sl [saveFilename] [loadFilename] -> save and load: Save the current global state to a file and then load a global state from a file.");
@@ -123,7 +125,8 @@ void Help()
     Console.WriteLine("c! | e! | q! -> exit without saving: Exit the program without saving the current state.");
 }
 
-void ExitAs() {
+void ExitAs() 
+{
     Console.WriteLine("Save current state before exiting? (y/n/c/save as [filename])");
     string? saveInput = Console.ReadLine();
     if (saveInput != null && saveInput.ToLower() == "y")
@@ -352,10 +355,7 @@ Result<NoteFlow, string> MakeNoteFlow(long value, int frequency, string offsetIn
     }
     else offset = int.Parse(offsetInput ?? "1") - 1;
 
-    if (string.IsNullOrWhiteSpace(taxInput)) taxInput = value < 0 ? "0" : GlobalState.TAX.ToString();
-    taxInput = taxInput.Trim("%".ToCharArray());
-    taxInput = taxInput.Trim("0.".ToCharArray());
-    double tax = string.IsNullOrWhiteSpace(taxInput) ? 0 : double.Parse(taxInput)/100;
+    var taxResult = GlobalState.ParseTaxInput(taxInput, value);
 
     if (reference.Length > GlobalState.NOTE_REFERENCE_LENGTH) return Result<NoteFlow, string>.Failure($"Reference '{reference}' exceeds {GlobalState.NOTE_REFERENCE_LENGTH} characters by {reference.Length - GlobalState.NOTE_REFERENCE_LENGTH} characters.");
     if (!System.Text.RegularExpressions.Regex.IsMatch(reference, @"^[a-zA-Z0-9-_]+$")) return Result<NoteFlow, string>.Failure($"Reference '{reference}' contains invalid characters.");
@@ -364,6 +364,8 @@ Result<NoteFlow, string> MakeNoteFlow(long value, int frequency, string offsetIn
     if (recipient.Length > GlobalState.ENTITY_REFERENCE_LENGTH) return Result<NoteFlow, string>.Failure($"Recipient '{recipient}' exceeds {GlobalState.ENTITY_REFERENCE_LENGTH} characters by {recipient.Length - GlobalState.ENTITY_REFERENCE_LENGTH} characters.");
     if (!System.Text.RegularExpressions.Regex.IsMatch(recipient, @"^[a-zA-Z0-9-_]+$")) return Result<NoteFlow, string>.Failure($"Recipient '{recipient}' contains invalid characters.");
 
+    if (!taxResult.IsSuccess) return Result<NoteFlow, string>.Failure(taxResult.Error!);
+    double tax = taxResult.Value;
     return Result<NoteFlow, string>.Success(new NoteFlow(value, frequency, offset, occurance, tax, reference, sender, recipient));
 }
 
@@ -550,11 +552,18 @@ Result<NoteFlow, string> GetNoteFlowFromUser(Entity entity)
     return MakeNoteFlow(value, frequency, offsetInput, occurance, taxInput, reference, sender, recipient);
 }
 
-Result<bool, string> MakeTransaction(Entity? senderEntity, Entity? recipientEntity, long value, double tax, string reference)
+Result<bool, string> MakeTransaction(Entity? senderEntity, Entity? recipientEntity, long value, string taxInput, string reference)
 {
     if (senderEntity == null) return Result<bool, string>.Failure("Sender entity not found.");
     if (recipientEntity == null) return Result<bool, string>.Failure("Recipient entity not found.");
 
+    var taxResult = GlobalState.ParseTaxInput(taxInput, value);
+    if (!taxResult.IsSuccess)
+    {
+        Console.WriteLine($"Invalid tax input: {taxResult.Error}");
+        return Result<bool, string>.Failure($"Invalid tax input: {taxResult.Error}");
+    }
+    double tax = taxResult.Value;
     var result = state.MakeTransaction(senderEntity, recipientEntity, value, tax, reference);
     if (!result.IsSuccess)
     {
@@ -728,21 +737,21 @@ void SetupEntities(GlobalState state)
 
 
     // Setup initial flows for entities
-    aya.AddFlow(new NoteFlow(1000, 7, 1, -1, GlobalState.TAX, "weekly_income", otherEntities["aya_employer"].reference, aya.reference));
-    aya.AddFlow(new NoteFlow(-400, 28, 1, -1, 0, "rent", aya.reference, otherEntities["aya_landlord"].reference));
-    aya.AddFlow(new NoteFlow(-100, 28, 1, -1, 0, "food", aya.reference, otherEntities["varied"].reference));
-    aya.AddFlow(new NoteFlow(-100, 28, 1, -1, 0, "maintenance", aya.reference, otherEntities["varied"].reference));
+    aya.AddFlow(new NoteFlow(1000, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["aya_employer"].reference, aya.reference));
+    aya.AddFlow(new NoteFlow(-400, 28, 0, -1, 0, "rent", aya.reference, otherEntities["aya_landlord"].reference));
+    aya.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "food", aya.reference, otherEntities["varied"].reference));
+    aya.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "maintenance", aya.reference, otherEntities["varied"].reference));
 
-    nemeki.AddFlow(new NoteFlow(400, 7, 1, -1, GlobalState.TAX, "weekly_income", otherEntities["nem_employer"].reference, nemeki.reference));
-    nemeki.AddFlow(new NoteFlow(-200, 28, 1, -1, 0, "rent", nemeki.reference, otherEntities["nem_landlord"].reference));
-    nemeki.AddFlow(new NoteFlow(-100, 28, 1, -1, 0, "food", nemeki.reference, otherEntities["varied"].reference));
-    nemeki.AddFlow(new NoteFlow(-100, 28, 1, -1, 0, "maintenance", nemeki.reference, otherEntities["varied"].reference));
+    nemeki.AddFlow(new NoteFlow(400, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["nem_employer"].reference, nemeki.reference));
+    nemeki.AddFlow(new NoteFlow(-200, 28, 0, -1, 0, "rent", nemeki.reference, otherEntities["nem_landlord"].reference));
+    nemeki.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "food", nemeki.reference, otherEntities["varied"].reference));
+    nemeki.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "maintenance", nemeki.reference, otherEntities["varied"].reference));
     
-    norpeth.AddFlow(new NoteFlow(100, 7, 1, -1, GlobalState.TAX, "weekly_income", otherEntities["achipol_nav"].reference, norpeth.reference));
+    norpeth.AddFlow(new NoteFlow(100, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["achipol_nav"].reference, norpeth.reference));
 
-    arkild.AddFlow(new NoteFlow(700, 7, 1, -1, GlobalState.TAX, "weekly_income", otherEntities["arkild_work"].reference, arkild.reference));
-    arkild.AddFlow(new NoteFlow(-4, 1, 1, -1, 0, "rent", arkild.reference, otherEntities["arkild_inn"].reference));
+    arkild.AddFlow(new NoteFlow(700, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["arkild_work"].reference, arkild.reference));
+    arkild.AddFlow(new NoteFlow(-4, 1, 0, -1, 0, "rent", arkild.reference, otherEntities["arkild_inn"].reference));
 
     // Setup transactions
-    MakeTransaction(aya, nemeki, 1350, 0, "half_pay");
+    MakeTransaction(aya, nemeki, 1350, "0", "half_pay");
 }

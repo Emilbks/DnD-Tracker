@@ -160,5 +160,28 @@ namespace Timekeeper_Program
 		{
 			return entities;
 		}
+		
+		public static Result<double, string> ParseTaxInput(string taxInput, long value = 0)
+		{
+			if (string.IsNullOrWhiteSpace(taxInput))
+			{
+				return Result<double, string>.Success(value < 0 ? 0 : GlobalState.TAX);
+			}
+
+			taxInput = taxInput.Trim();
+			if (taxInput.EndsWith("%"))
+			{
+				taxInput = taxInput.TrimEnd('%');
+			}
+			if (taxInput.StartsWith("0."))
+			{
+				taxInput = taxInput.Substring(2);
+			}
+			if (double.TryParse(taxInput, out double result))
+			{
+				return Result<double, string>.Success(result/100);
+			}
+			return Result<double, string>.Failure($"Invalid tax input: '{taxInput}'");
+		}
 	}
 }

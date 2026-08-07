@@ -83,7 +83,7 @@ namespace Timekeeper_Program
 
 		public void DisplayEntity(bool debug = false)
 		{
-			Console.WriteLine($"Entity: {name} ({reference})");
+			Console.WriteLine($"Entity: {name} ({reference} | ID: {id})");
 			Console.WriteLine($"Balance: {GlobalState.FormatNotes(balance)}{(isBalanceRelevant ? "" : " (Not Relevant)")}");
 			Console.WriteLine("Flows:");
 			foreach (NoteFlow flow in flows)
