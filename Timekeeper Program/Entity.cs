@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using System.Runtime.InteropServices;
-namespace Timekeeper_Program
+namespace TimekeeperProgram
 {
 	public class Entity
 	{
