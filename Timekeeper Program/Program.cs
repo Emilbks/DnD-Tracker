@@ -22,7 +22,7 @@ var options = new JsonSerializerOptions
 
 LoadGlobalState("political_intrigue");
 //SetupEntities(state);
-;
+
 
 while (true)
 {
@@ -738,9 +738,9 @@ Result<bool, string> WriteToObsidian()
 
     StringBuilder sb = new StringBuilder();
     sb.AppendLine("**WARNING! THIS FILE IS AUTOMATICALLY OVERWRITTEN**");
+    sb.AppendLine($"**Last Updated: {Date.WrittenDate(state.system_date)}**");
     sb.AppendLine();
     sb.AppendLine("# Balance Sheet");
-    sb.AppendLine($"**Last Updated: {Date.WrittenDate(state.system_date)}**");
     sb.AppendLine();
     sb.AppendLine("## Characters");
     sb.AppendLine();
@@ -753,6 +753,40 @@ Result<bool, string> WriteToObsidian()
     sb.AppendLine();
 
     File.WriteAllText(obsidianPath, sb.ToString());
+
+    string[] players = { "aya", "nemeki", "norpeth", "arkild" };
+    foreach (string player in players)
+    {
+        obsidianPath = Environment.GetEnvironmentVariable($"OBSIDIAN_PLAYER_{player.ToUpper()}_PATH");
+        if (string.IsNullOrWhiteSpace(obsidianPath))
+        {
+            Console.WriteLine($"Environment variable 'OBSIDIAN_PLAYER_{player.ToUpper()}_PATH' is not set. Please set it to the path of the player's Obsidian note.");
+            return Result<bool, string>.Failure($"Environment variable 'OBSIDIAN_PLAYER_{player.ToUpper()}_PATH' is not set.");
+        }
+        Entity? entity = state.GetEntityByReference(player);
+        if (entity == null)
+        {
+            Console.WriteLine($"Entity '{player}' not found in the global state.");
+            return Result<bool, string>.Failure($"Entity '{player}' not found in the global state.");
+        }
+        StringBuilder playerSb = new StringBuilder();
+        playerSb.AppendLine("**WARNING! THIS FILE IS AUTOMATICALLY OVERWRITTEN**");
+        playerSb.AppendLine($"**Last Updated: {Date.WrittenDate(state.system_date)}**");
+        playerSb.AppendLine();
+        playerSb.AppendLine($"# Current State");
+        playerSb.AppendLine();
+        playerSb.AppendLine(entity.DisplayEntityAsString(debug: false, markdown: true));
+        playerSb.AppendLine();
+
+        playerSb.AppendLine($"# History");
+        playerSb.AppendLine();
+        playerSb.AppendLine(entity.DisplayHistoryAsMarkdown());
+        playerSb.AppendLine();
+
+        File.WriteAllText(obsidianPath, playerSb.ToString());
+    }
+
+
 
     return Result<bool, string>.Success(true);
 }

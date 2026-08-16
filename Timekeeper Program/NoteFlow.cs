@@ -45,9 +45,9 @@ namespace Timekeeper_Program
 			return $"NoteFlow: {reference} | Value: {value} | Frequency: {frequency} | Offset: {offset} | Occurance: {occurance} | Tax: {tax * 100}% | Reference: {reference} | Sender: {sender} | Recipient: {recipient}";
 		}
 
-		public string DisplayFlow(bool debug = false)
+		public string DisplayFlow(bool debug = false, bool markdown = false)
 		{
-			return $"{reference, -20}| {GlobalState.FormatNotes(value), 12} {Entity.GetFrequencyText(this), -12} at {tax * 100, 3}% tax | From {sender, -GlobalState.ENTITY_REFERENCE_LENGTH} to {recipient, -GlobalState.ENTITY_REFERENCE_LENGTH} | Offset: {offset, 3}, Occurance: {occurance, 3} | Next Trigger in {NextTriggerText(GlobalState.Instance.system_date.day), 3} day(s){(debug ? $" | ID: {id, 3} | Ref: {reference, GlobalState.NOTE_REFERENCE_LENGTH}" : "")}";
+			return $"| {reference, -20} | {GlobalState.FormatNotes(value), 12} {Entity.GetFrequencyText(this), -12}{(markdown ? "<br>" : " ")}at {tax * 100, 3}% tax | From {sender, -GlobalState.ENTITY_REFERENCE_LENGTH}{(markdown ? "<br>To  " : " to")} {recipient, -GlobalState.ENTITY_REFERENCE_LENGTH} | Offset: {offset, 3}{(markdown ? "<br>" : ", ")}Occurance: {occurance, 3} | {(markdown ? "" : "Next Trigger in ")} {NextTriggerText(GlobalState.Instance.system_date.day), 3} day(s) |{(debug ? $" ID: {id, 3} | Ref: {reference, GlobalState.NOTE_REFERENCE_LENGTH} |" : "")}";
 		}
 
 		public int NextTriggerText(int currentDay) { int val = frequency - ((currentDay + frequency - offset) % frequency); return delay > frequency ? delay : (val == frequency ? frequency : val); }

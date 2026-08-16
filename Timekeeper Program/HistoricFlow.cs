@@ -82,33 +82,38 @@ namespace Timekeeper_Program
 		
         public void DisplayFlow(bool debug = false)
         {
+			Console.WriteLine(DisplayFlowAsString(debug));
+		}
+
+		public string DisplayFlowAsString(bool debug = false, bool markdown = false)
+		{
 			string content;
 			switch (type)
-				{
-					case HistoricFlowType.AddedFlow:
-						content = $"{"Added Flow", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
-						if (debug) content += $"\r\n- Flow: {oldFlow?.ToString()}";
-						break;
-					case HistoricFlowType.ChangedFlow:
-						content = $"{"Changed Flow", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} to {newFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
-						if (debug) content += $"\r\n- Old Flow: {oldFlow?.ToString()}\r\n- New Flow: {newFlow?.ToString()}";
-						break;
-					case HistoricFlowType.RemovedFlow:
-						content = $"{"Removed Flow", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
-						if (debug) content += $"\r\n- Flow: {oldFlow?.ToString()}";
-						break;
-					case HistoricFlowType.AppliedFlow:
-						content = $"{"Applied Flow", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(value), 15} at {tax * 100, 3}% tax. | Balance {GlobalState.FormatNotes(oldBalance), 12} -> {GlobalState.FormatNotes(newBalance), 12}";
-						break;
-					case HistoricFlowType.TransactionFlow:
-						content = $"{"Transaction", -GlobalState.DESCRIPTION_LENGTH}: {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(oldFlow?.value ?? 0), 15} at {oldFlow?.tax * 100 ?? 0, 3}% tax. | Balance {GlobalState.FormatNotes(oldBalance), 12} -> {GlobalState.FormatNotes(newBalance), 12}";
-						break;
-					default:
-						content = $"{type, -GlobalState.DESCRIPTION_LENGTH}: {GlobalState.FormatNotes(value), 15}, tax {tax * 100}%";
-						break;
-				}
-				Console.WriteLine($"{Date.WrittenDate(date), -10} - {content}");
-        }
+			{
+				case HistoricFlowType.AddedFlow:
+					content = $"{"Added Flow", -GlobalState.DESCRIPTION_LENGTH}{(markdown ? " |" : ":")} {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
+					if (debug) content += $"\r\n- Flow: {oldFlow?.ToString()}";
+					break;
+				case HistoricFlowType.ChangedFlow:
+					content = $"{"Changed Flow", -GlobalState.DESCRIPTION_LENGTH}{(markdown ? " |" : ":")} {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} to {newFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
+					if (debug) content += $"\r\n- Old Flow: {oldFlow?.ToString()}\r\n- New Flow: {newFlow?.ToString()}";
+					break;
+				case HistoricFlowType.RemovedFlow:
+					content = $"{"Removed Flow", -GlobalState.DESCRIPTION_LENGTH}{(markdown ? " |" : ":")} {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH}";
+					if (debug) content += $"\r\n- Flow: {oldFlow?.ToString()}";
+					break;
+				case HistoricFlowType.AppliedFlow:
+					content = $"{"Applied Flow", -GlobalState.DESCRIPTION_LENGTH}{(markdown ? " |" : ":")} {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(value), 15} at {tax * 100, 3}% tax. | {(markdown ? "" : "Balance ")}{GlobalState.FormatNotes(oldBalance), 12} -> {GlobalState.FormatNotes(newBalance), 12}";
+					break;
+				case HistoricFlowType.TransactionFlow:
+					content = $"{"Transaction", -GlobalState.DESCRIPTION_LENGTH}{(markdown ? " |" : ":")} {oldFlow?.reference, -GlobalState.NOTE_REFERENCE_LENGTH} from {oldFlow?.sender, -GlobalState.NOTE_REFERENCE_LENGTH} to {oldFlow?.recipient, -GlobalState.NOTE_REFERENCE_LENGTH} with value {GlobalState.FormatNotes(oldFlow?.value ?? 0), 15} at {oldFlow?.tax * 100 ?? 0, 3}% tax. | {(markdown ? "" : "Balance ")}{GlobalState.FormatNotes(oldBalance), 12} -> {GlobalState.FormatNotes(newBalance), 12}";
+					break;
+				default:
+					content = $"{type, -GlobalState.DESCRIPTION_LENGTH}: {GlobalState.FormatNotes(value), 15}, tax {tax * 100}%";
+					break;
+			}
+			return $"{(markdown ? "| " : "")}{Date.WrittenDate(date), -10} {(markdown ? "|" : "-")} {content}{(markdown ? " |" : "")}";
+		}
 	}
 
 	public enum HistoricFlowType

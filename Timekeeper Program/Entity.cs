@@ -82,24 +82,54 @@ namespace Timekeeper_Program
 
 		public void DisplayEntity(bool debug = false)
 		{
-			Console.WriteLine($"Entity: {name} ({reference} | ID: {id})");
-			Console.WriteLine($"Balance: {(isBalanceRelevant ? GlobalState.FormatNotes(balance) : "Not Relevant")}");
-			Console.WriteLine("Flows:");
+			Console.WriteLine(DisplayEntityAsString(debug));
+		}
+
+		public string DisplayEntityAsString(bool debug = false, bool markdown = false)
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine($"Entity: {name} ({reference} | ID: {id})");
+			sb.AppendLine($"Balance: {(isBalanceRelevant ? GlobalState.FormatNotes(balance) : "Not Relevant")}");
+			sb.AppendLine("Flows:");
+			if (markdown) sb.AppendLine();
+        	sb.AppendLine($"| {"Reference", -20} | {"Value", -37} | {"Direction", -(GlobalState.ENTITY_REFERENCE_LENGTH * 2 + 9)} | {"Occurance", -27} | {"Next Trigger", -26} |");
+			sb.AppendLine($"|{new string('-', 22)}|{new string('-', 39)}|{new string('-', GlobalState.ENTITY_REFERENCE_LENGTH * 2 + 11)}|{new string('-', 29)}|{new string('-', 28)}|");
 			foreach (NoteFlow flow in flows)
 			{
-				Console.WriteLine($"- {flow.DisplayFlow(debug)}");
+				sb.AppendLine($"{flow.DisplayFlow(debug, markdown)}");
 			}
-			Console.WriteLine();
+			sb.AppendLine();
+			return sb.ToString();
 		}
 
 		public void DisplayHistory()
 		{
-			Console.WriteLine($"History for {name} ({reference} | ID: {id}):");
+			Console.WriteLine(DisplayHistoryAsString());
+		}
+
+		public string DisplayHistoryAsString()
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine($"History for {name} ({reference} | ID: {id}):");
 			foreach (HistoricFlow flow in history)
 			{
-				flow.DisplayFlow();
+				sb.AppendLine(flow.DisplayFlowAsString());
 			}
-			Console.WriteLine();
+			sb.AppendLine();
+			return sb.ToString();
+		}
+
+		public string DisplayHistoryAsMarkdown()
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine($"| Date | FlowType | Info | Balance |");
+			sb.AppendLine($"|{new string('-', 12)}|{new string('-', 12)}|{new string('-', 80)}|{new string('-', 28)}|");
+			foreach (HistoricFlow flow in history)
+			{
+				sb.AppendLine(flow.DisplayFlowAsString(markdown: true));
+			}
+			sb.AppendLine();
+			return sb.ToString();
 		}
 
 		public static string GetFrequencyText(NoteFlow flow)
