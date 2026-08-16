@@ -1,10 +1,14 @@
 ﻿using Timekeeper_Program;
 using System.Text.Json;
+using DotNetEnv;
+using System.Text;
+
+Env.Load("../.env");
 
 string[] debug_params = ["debug", "-debug", "--debug", "d", "-d", "--d", "true", "-true", "--true", "t", "-t", "--t", "1"];
 string[] force_params = ["force", "-force", "--force", "f", "-f", "--f", "true", "-true", "--true", "t", "-t", "--t", "1"];
-string[] bool_params = ["true", "-true", "--true", "t", "-t", "--t", "1", "false", "-false", "--false", "f", "-f", "--f", "0", "-0", "--0"];
-string[] withEntities_params = ["withentities", "-withentities", "--withentities", "we", "-we", "--we", "true", "-true", "--true", "t", "-t", "--t", "1"];
+string[] bool_params = ["true", "-true", "--true", "t", "-t", "--t", "1", "-1", "--1", "false", "-false", "--false", "f", "-f", "--f", "0", "-0", "--0"];
+string[] withEntities_params = ["withentities", "-withentities", "--withentities", "we", "-we", "--we", "true", "-true", "--true", "t", "-t", "--t", "1", "-1", "--1", "false", "-false", "--false", "f", "-f", "--f", "0", "-0", "--0"];
 int format;
 
 GlobalState state = GlobalState.Instance;
@@ -646,6 +650,15 @@ void SaveGlobalState(string? filename)
     string json = JsonSerializer.Serialize(state, options);
     File.WriteAllText(filePath, json);
     loadedGlobalState = filename;
+
+    if (filename == "political_intrigue")
+    {
+        var writeResult = WriteToObsidian();
+        if (!writeResult.IsSuccess)
+        {
+            Console.WriteLine($"Failed to write to Obsidian: {writeResult.Error}");
+        }
+    }
 }
 
 void LoadGlobalState(string? filename)
@@ -703,6 +716,36 @@ void UpdateGlobalState(GlobalState newState)
     GlobalState.SetInstance(newState);
     state = GlobalState.Instance;
 }   
+
+Result<bool, string> WriteToObsidian()
+{
+    string? obsidianPath = Environment.GetEnvironmentVariable("OBSIDIAN_FILE_PATH");
+    if (string.IsNullOrWhiteSpace(obsidianPath))
+    {
+        Console.WriteLine("Environment variable 'OBSIDIAN_FILE_PATH' is not set. Please set it to the path of your Obsidian vault.");
+        return Result<bool, string>.Failure("Environment variable 'OBSIDIAN_FILE_PATH' is not set.");
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.AppendLine("**WARNING! THIS FILE IS AUTOMATICALLY OVERWRITTEN**");
+    sb.AppendLine();
+    sb.AppendLine("# Balance Sheet");
+    sb.AppendLine($"**Last Updated: {Date.WrittenDate(state.system_date)}**");
+    sb.AppendLine();
+    sb.AppendLine("## Characters");
+    sb.AppendLine();
+    sb.AppendLine("| Character | Balance |");
+    sb.AppendLine("|-----------|---------|");
+    sb.AppendLine($"| Aya | {GlobalState.FormatNotes(state.GetEntityByReference("aya")?.balance ?? 0)} |");
+    sb.AppendLine($"| Nemeki | {GlobalState.FormatNotes(state.GetEntityByReference("nemeki")?.balance ?? 0)} |");
+    sb.AppendLine($"| Norpeth | {GlobalState.FormatNotes(state.GetEntityByReference("norpeth")?.balance ?? 0)} |");
+    sb.AppendLine($"| Arkild | {GlobalState.FormatNotes(state.GetEntityByReference("arkild")?.balance ?? 0)} |");
+    sb.AppendLine();
+
+    File.WriteAllText(obsidianPath, sb.ToString());
+
+    return Result<bool, string>.Success(true);
+}
 
 void SetupEntities(GlobalState state)
 {
