@@ -79,7 +79,9 @@ while (true)
         case "s":
             SaveGlobalState(strings.Length >= 2 ? strings[1] : null);
             break;
-            
+        case "qs":
+            SaveGlobalState(loadedGlobalState);
+            break;
         case "l":
             LoadGlobalState(strings.Length >= 2 ? strings[1] : null);
             break;
@@ -122,6 +124,7 @@ void Help()
     Console.WriteLine("rf [reference|id] [flow reference|id] [force] -> remove flow: Remove a NoteFlow from a specific entity. Use 'true' or 'force' to skip confirmation.");
     Console.WriteLine("mt [sender reference|id] [recipient reference|id] [value] [tax] [reference] -> make transaction: Make a transaction between two entities.");
     Console.WriteLine("s [filename] -> save: Save the current global state to a file.");
+    Console.WriteLine("qs -> quick save: Save the current global state to the last loaded file.");
     Console.WriteLine("l [filename] -> load: Load a global state from a file.");
     Console.WriteLine("sl [saveFilename] [loadFilename] -> save and load: Save the current global state to a file and then load a global state from a file.");
     Console.WriteLine("fresh -> fresh: Create a new, empty global state.");
