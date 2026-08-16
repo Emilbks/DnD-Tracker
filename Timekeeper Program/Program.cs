@@ -100,6 +100,12 @@ while (true)
         case "q":
             ExitAs();
             break;
+        case "qc":
+        case "qe":
+        case "qq":
+            SaveGlobalState(loadedGlobalState);
+            Exit();
+            break;
         case "c!":
         case "e!":
         case "q!":
@@ -129,6 +135,7 @@ void Help()
     Console.WriteLine("sl [saveFilename] [loadFilename] -> save and load: Save the current global state to a file and then load a global state from a file.");
     Console.WriteLine("fresh -> fresh: Create a new, empty global state.");
     Console.WriteLine("c | e | q -> exit: Exit the program. You will be prompted to save.");
+    Console.WriteLine("qc | qe | qq -> quick exit: Save the current state and exit the program.");
     Console.WriteLine("c! | e! | q! -> exit without saving: Exit the program without saving the current state.");
 }
 
