@@ -19,6 +19,7 @@ namespace Timekeeper_Program
 
 		public NoteFlow(long value, int frequency, int offset, int occurance, double tax, string reference, string sender, string recipient)
 		{
+			flowType = "NoteFlow";
 			this.value = value;
 			this.frequency = frequency;
 			this.offset = offset % frequency;

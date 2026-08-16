@@ -3,7 +3,7 @@ using System.Text.Json;
 
 string[] debug_params = ["debug", "-debug", "--debug", "d", "-d", "--d", "true", "-true", "--true", "t", "-t", "--t", "1"];
 string[] force_params = ["force", "-force", "--force", "f", "-f", "--f", "true", "-true", "--true", "t", "-t", "--t", "1"];
-string[] true_params = ["true", "-true", "--true", "t", "-t", "--t", "1"];
+string[] bool_params = ["true", "-true", "--true", "t", "-t", "--t", "1", "false", "-false", "--false", "f", "-f", "--f", "0", "-0", "--0"];
 string[] withEntities_params = ["withentities", "-withentities", "--withentities", "we", "-we", "--we", "true", "-true", "--true", "t", "-t", "--t", "1"];
 int format;
 
@@ -16,8 +16,8 @@ var options = new JsonSerializerOptions
     PropertyNameCaseInsensitive = true
 };
 
-//LoadGlobalState("political_intrigue");
-SetupEntities(state);
+LoadGlobalState("political_intrigue");
+//SetupEntities(state);
 ;
 
 while (true)
@@ -40,7 +40,7 @@ while (true)
             break;
 
         case "ds":
-            state.DisplayState(strings.Length >= 2 && debug_params.Contains(strings[1].ToLower()));
+            state.DisplayState(strings.Length >= 2 && bool_params.Contains(strings[1].ToLower()), strings.Length >= 3 && debug_params.Contains(strings[2].ToLower()));
             break;
 
         case "de":
@@ -85,7 +85,7 @@ while (true)
             break;
 
         case "fresh":
-            FreshGlobalState(strings.Length >= 2 && true_params.Contains(strings[1].ToLower()), strings.Length >= 3 && withEntities_params.Contains(strings[2].ToLower()));
+            FreshGlobalState(strings.Length >= 2 && bool_params.Contains(strings[1].ToLower()), strings.Length >= 3 && withEntities_params.Contains(strings[2].ToLower()));
             break;
 
 
@@ -110,7 +110,7 @@ void Help()
     Console.WriteLine("Available commands:");
     Console.WriteLine("h | ! -> help: Display this help message.");
     Console.WriteLine("p [days] -> progress: Progress the simulation by a number of days.");
-    Console.WriteLine("ds [debug] -> display state: Display the current state of all entities.");
+    Console.WriteLine("ds [relevant] [debug] -> display state: Display the current state of all entities.");
     Console.WriteLine("de [reference|id] [debug] -> display entity: Display details of a specific entity.");
     Console.WriteLine("deh [reference|id] [debug] -> display entity history: Display the history of a specific entity.");
     Console.WriteLine("af [reference|id] [format] [parameters (x9)] -> add flow: Add a new NoteFlow to a specific entity. Format 1 for one by one, 2 for comma-separated, 3 for parameters.");
@@ -187,7 +187,7 @@ Result<bool, string> DisplayEntity(Entity? entity = null, bool debug = false)
     if (entity == null) return Result<bool, string>.Failure("Entity not found.");
 
     Console.WriteLine();
-    Console.WriteLine($"Date: {Date.WrittenDate(state.system_date)} (Day: {state.system_date.day})");
+    Console.WriteLine($"Date: {Date.WrittenDate(state.system_date)}");
     entity.DisplayEntity(debug);
     return Result<bool, string>.Success(true);
 }
@@ -706,8 +706,8 @@ void UpdateGlobalState(GlobalState newState)
 
 void SetupEntities(GlobalState state)
 {
-    state.SetDate(1455347);
-    // state.SetDate(0);
+    state.SetDate(1455347, withProgress: false);
+    // state.SetDate(0, withProgress: false);
 
     Entity aya = new Entity ( "aya", "\"Ata\" Aya Toma", 10000);
     state.AddEntity(aya);
@@ -730,8 +730,11 @@ void SetupEntities(GlobalState state)
         { "achipol_nav", new Entity ("achipol_nav", "Achipol Navigation", 100000, false) },
         { "arkild_inn", new Entity ("arkild_inn", "Inn", 100000, false) },
         { "arkild_work", new Entity ("arkild_work", "Work", 100000, false) },
-        { "varied", new Entity ("varied", "Varied", 100000, false) }
+        { "varied", new Entity ("varied", "Varied", 100000, false) },
+        { "informant1", new Entity ("informant1", "Informant 1", 2000, true) },
+        { "Broken_Cog", new Entity ("Broken_Cog", "Broken Cog", 100000, false) }
     };
+
     foreach (var entity in otherEntities.Values) state.AddEntity(entity);
 
 
@@ -744,7 +747,7 @@ void SetupEntities(GlobalState state)
 
     nemeki.AddFlow(new NoteFlow(400, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["nem_employer"].reference, nemeki.reference));
     nemeki.AddFlow(new NoteFlow(-200, 28, 0, -1, 0, "rent", nemeki.reference, otherEntities["nem_landlord"].reference));
-    nemeki.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "food", nemeki.reference, otherEntities["varied"].reference));
+    nemeki.AddFlow(new NoteFlow(-300, 28, 0, -1, 0, "food", nemeki.reference, otherEntities["varied"].reference));
     nemeki.AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "maintenance", nemeki.reference, otherEntities["varied"].reference));
     
     norpeth.AddFlow(new NoteFlow(100, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["achipol_nav"].reference, norpeth.reference));
@@ -752,6 +755,20 @@ void SetupEntities(GlobalState state)
     arkild.AddFlow(new NoteFlow(700, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["arkild_work"].reference, arkild.reference));
     arkild.AddFlow(new NoteFlow(-4, 1, 0, -1, 0, "rent", arkild.reference, otherEntities["arkild_inn"].reference));
 
+    otherEntities["informant1"].AddFlow(new NoteFlow(250, 7, 0, -1, GlobalState.TAX, "weekly_income", otherEntities["varied"].reference, otherEntities["informant1"].reference));
+    otherEntities["informant1"].AddFlow(new NoteFlow(-100, 28, 0, -1, 0, "rent", otherEntities["informant1"].reference, otherEntities["varied"].reference));
+    otherEntities["informant1"].AddFlow(new NoteFlow(-120, 28, 0, -1, 0, "food", otherEntities["informant1"].reference, otherEntities["varied"].reference));
+    otherEntities["informant1"].AddFlow(new NoteFlow(-80, 28, 0, -1, 0, "maintenance", otherEntities["informant1"].reference, otherEntities["varied"].reference));
+
     // Setup transactions
     MakeTransaction(aya, nemeki, 1350, "0", "half_pay");
+    MakeTransaction(nemeki, otherEntities["informant1"], 350, "0", "info_payment");
+    MakeTransaction(otherEntities["informant1"], otherEntities["varied"], 200, "0", "info_fee");
+    Progress(4);
+    MakeTransaction(nemeki, otherEntities["informant1"], 200, "0", "info_bonus");
+    MakeTransaction(otherEntities["informant1"], otherEntities["varied"], 100, "0", "info_bonus");
+    Progress(1);
+    MakeTransaction(nemeki, otherEntities["Broken_Cog"], 10, GlobalState.TAX.ToString(), "drinks");
+    MakeTransaction(arkild, otherEntities["Broken_Cog"], 10, GlobalState.TAX.ToString(), "drinks");
+    MakeTransaction(norpeth, nemeki, 2000, "0", "start_pay");
 }

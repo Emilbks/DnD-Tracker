@@ -1,8 +1,14 @@
 using System.Text.Json.Serialization;
 namespace Timekeeper_Program
 {
+    [JsonPolymorphic(TypeDiscriminatorPropertyName="$flowType")]
+    [JsonDerivedType(typeof(HistoricFlow), "HistoricFlow")]
+    [JsonDerivedType(typeof(NoteFlow), "NoteFlow")]
+    [JsonDerivedType(typeof(TransactionFlow), "TransactionFlow")]
 	public abstract class Flow
 	{
+        [JsonInclude]
+        protected string flowType { get; set; } = "";
         [JsonInclude]
         public int id { get; protected set; } = -1;
         [JsonInclude]

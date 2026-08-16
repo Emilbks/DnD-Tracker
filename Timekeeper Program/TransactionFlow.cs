@@ -7,6 +7,7 @@ namespace Timekeeper_Program
 
         public TransactionFlow(string reference, long value, double tax, string sender, string recipient)
         {
+            flowType = "TransactionFlow";
             this.reference = reference;
             this.value = value;
             this.tax = tax;

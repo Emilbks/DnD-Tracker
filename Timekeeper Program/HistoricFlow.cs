@@ -23,12 +23,14 @@ namespace Timekeeper_Program
 
 		public HistoricFlow(Date date, HistoricFlowType type)
 		{
+			flowType = "HistoricFlow";
 			this.date = date;
 			this.type = type;
 		}
 
 		public HistoricFlow(Date date, HistoricFlowType type, Flow oldFlow)
 		{
+			flowType = "HistoricFlow";
 			this.date = date;
 			this.type = type;
 			this.oldFlow = oldFlow;
@@ -37,6 +39,7 @@ namespace Timekeeper_Program
 
 		public HistoricFlow(Date date, HistoricFlowType type, Flow oldFlow, Flow newFlow)
 		{
+			flowType = "HistoricFlow";
 			this.date = date;
 			this.type = type;
 			this.oldFlow = oldFlow;
@@ -45,12 +48,32 @@ namespace Timekeeper_Program
 
 		public HistoricFlow(Date date, HistoricFlowType type, Flow oldFlow, long oldBalance, long newBalance)
 		{
+			flowType = "HistoricFlow";
 			this.date = date;
 			this.type = type;
 			this.oldFlow = oldFlow;
 			this.oldBalance = oldBalance;
 			this.newBalance = newBalance;
 		}
+
+		[JsonConstructor]
+		private HistoricFlow(Date date, HistoricFlowType type, Flow oldFlow, Flow newFlow, long oldBalance, long newBalance)
+		{
+			flowType = "HistoricFlow";
+			this.date = date;
+			this.type = type;
+			this.oldFlow = oldFlow;
+			this.newFlow = newFlow;
+			this.oldBalance = oldBalance;
+			this.newBalance = newBalance;
+		}
+
+		public void SetDate(Date newDate) { date = newDate; }
+		public void SetType(HistoricFlowType newType) { type = newType; }
+		public void SetRecipient(string recipient) { this.recipient = recipient; }
+		public void SetSender(string sender) { this.sender = sender; }
+		public void SetReference(string reference) { this.reference = reference; }
+
 		public void SetOldFlow(Flow oldFlow) { this.oldFlow = oldFlow ; }
         public void SetNewFlow(Flow newFlow) { this.newFlow = newFlow; }
         public void SetOldBalance(long oldBalance) { this.oldBalance = oldBalance; }

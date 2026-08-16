@@ -29,7 +29,7 @@ namespace Timekeeper_Program
 		{
 			for (int i = system_date.day; system_date.day + day > i; i++)
 			{
-				ProgressEntityDay(new Date(i));
+				ProgressEntityDay(new Date(i + 1));
 			}
 			system_date = new Date(system_date.day + day);
 		}
@@ -43,12 +43,13 @@ namespace Timekeeper_Program
 			}
 		}
 
-		public void DisplayState(bool debug = false)
+		public void DisplayState(bool only_relevant = true, bool debug = false)
 		{
-			Console.WriteLine($"Date: {Date.WrittenDate(system_date)} (Day {system_date.day})");
+    		Console.WriteLine();
+			Console.WriteLine($"Date: {Date.WrittenDate(system_date)}");
 			foreach (Entity entity in entities)
 			{
-				entity.DisplayEntity(debug);
+				if (entity.isBalanceRelevant) entity.DisplayEntity(debug);
 			}
 		}
 
@@ -173,9 +174,13 @@ namespace Timekeeper_Program
 			{
 				taxInput = taxInput.TrimEnd('%');
 			}
-			if (taxInput.StartsWith("0."))
+			if (taxInput.StartsWith("0.") || taxInput.StartsWith("0,"))
 			{
 				taxInput = taxInput.Substring(2);
+			}
+			if (taxInput.StartsWith(".") || taxInput.StartsWith(","))
+			{
+				taxInput = taxInput.Substring(1);
 			}
 			if (double.TryParse(taxInput, out double result))
 			{

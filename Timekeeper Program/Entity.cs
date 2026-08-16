@@ -30,7 +30,6 @@ namespace Timekeeper_Program
 		public List<HistoricFlow> history { get; private set; }
 		[JsonInclude]
 		public bool isBalanceRelevant { get; private set; } = true;
-
 		public Entity(string reference, string name, long balance) 
 		{
 			this.reference = reference;
@@ -40,6 +39,7 @@ namespace Timekeeper_Program
 			history = new List<HistoricFlow>();
 		}
 
+		[JsonConstructor]
 		public Entity(string reference, string name, long balance, bool isBalanceRelevant) 
 		{
 			this.reference = reference;
@@ -52,7 +52,6 @@ namespace Timekeeper_Program
 
 		public void CalculateFlow(Date day)
 		{
-			day.ProgressDate();
 			foreach (var flow in flows)
 			{
 				flow.CheckAndProgressDelay();
@@ -84,7 +83,7 @@ namespace Timekeeper_Program
 		public void DisplayEntity(bool debug = false)
 		{
 			Console.WriteLine($"Entity: {name} ({reference} | ID: {id})");
-			Console.WriteLine($"Balance: {GlobalState.FormatNotes(balance)}{(isBalanceRelevant ? "" : " (Not Relevant)")}");
+			Console.WriteLine($"Balance: {(isBalanceRelevant ? GlobalState.FormatNotes(balance) : "Not Relevant")}");
 			Console.WriteLine("Flows:");
 			foreach (NoteFlow flow in flows)
 			{

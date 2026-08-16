@@ -12,7 +12,7 @@ namespace Timekeeper_Program
 
         public int CalandarDate { get { return day + 1; } }
         public Weekdays weekday { get { return (Weekdays)(day % 7 + 1); } }
-        public int month { get { return day / MONTHDAYS % 13; } }
+        public int month { get { return day / MONTHDAYS % 13 + 1; } }
         public int ClandarMonth { get { return month + 1; } }
         public int monthDay { get { return day % MONTHDAYS + 1; } }
         public Months monthName { get { return (Months)(day / MONTHDAYS % 13 + 1); } }
@@ -25,9 +25,9 @@ namespace Timekeeper_Program
 
 		public static string WrittenDate(Date date, bool shorthand = true, bool monthName = false)
 		{
-			if (shorthand && !monthName) return $"{date.year}/{date.month + 1}/{date.monthDay}";
-			if (shorthand && monthName) return $"{date.year}/{date.monthName} {date.monthDay}";
-			return $"{date.weekday}, {date.ClandarMonth}/{date.monthDay}, Year {date.year}";
+			if (shorthand && !monthName) return $"{string.Format("{0:0000}", date.year)}/{string.Format("{0:00}", date.month)}/{string.Format("{0:00}", date.monthDay)}";
+			if (shorthand && monthName) return $"{string.Format("{0:0000}", date.year)}/{date.monthName} {string.Format("{0:00}", date.monthDay)}";
+			return $"{date.weekday}, {date.ClandarMonth}/{string.Format("{0:00}", date.monthDay)}, Year {string.Format("{0:0000}", date.year)}";
 		}
 
         public void SetDate(int newDate) { this.day = newDate; }
